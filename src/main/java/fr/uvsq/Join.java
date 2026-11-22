@@ -1,8 +1,10 @@
 package fr.uvsq;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Équi-jointure entre deux tables.
@@ -25,32 +27,27 @@ public class Join implements Operator {
 
   @Override
   public Table execute() {
-    Table leftTable = left.execute();
-    Table rightTable = right.execute();
+    Table l = left.execute();
+    Table r = right.execute();
+    int leftIdx = l.getColumnIndex(leftCol);
+    int rightIdx = r.getColumnIndex(rightCol);
 
-    List<String> mergedCols = new ArrayList<>(leftTable.getColumns());
-    for (String c : rightTable.getColumns()) {
-      if (!mergedCols.contains(c)) {
-        mergedCols.add(c);
-      }
-    }
-    Table outTable = new Table(mergedCols);
+    // colonnes de droite absentes à gauche
+    List<Integer> keptRight = IntStream.range(0, r.getColumns().size())
+        .filter(i -> !l.getColumns().contains(r.getColumns().get(i)))
+        .boxed()
+        .toList();
+    List<String> columns = Stream.concat(l.getColumns().stream(),
+        keptRight.stream().map(r.getColumns()::get)).toList();
 
-    int leftIdx = leftTable.getColumns().indexOf(leftCol);
-    int rightIdx = rightTable.getColumns().indexOf(rightCol);
-    for (Row lrow : leftTable.getRows()) {
-      for (Row rrow : rightTable.getRows()) {
-        if (Objects.equals(lrow.get(leftIdx), rrow.get(rightIdx))) {
-          List<Object> mergedVals = new ArrayList<>(lrow.getValues());
-          for (int i = 0; i < rightTable.getColumns().size(); i++) {
-            if (!leftTable.getColumns().contains(rightTable.getColumns().get(i))) {
-              mergedVals.add(rrow.get(i));
-            }
-          }
-          outTable.addRow(new Row(mergedVals));
-        }
-      }
-    }
-    return outTable;
+    Map<Object, List<Row>> index = r.getRows().stream()
+        .collect(Collectors.groupingBy(row -> row.get(rightIdx)));
+
+    List<Row> rows = l.getRows().stream()
+        .flatMap(lrow -> index.getOrDefault(lrow.get(leftIdx), List.of()).stream()
+            .map(rrow -> new Row(Stream.concat(lrow.getValues().stream(),
+                keptRight.stream().map(rrow::get)).toList())))
+        .toList();
+    return new Table(columns, rows);
   }
 }

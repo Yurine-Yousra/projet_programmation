@@ -13,6 +13,11 @@ public class Table {
         this.rows = new ArrayList<>();
     }
 
+    public Table(List<String> columns, List<Row> rows) {
+        this.columns = List.copyOf(columns);
+        this.rows = new ArrayList<>(rows);
+    }
+
       public int getColumnIndex(String colName) {
         int idx = columns.indexOf(colName);
         if (idx == -1) throw new IllegalArgumentException("Colonne inconnue: " + colName);

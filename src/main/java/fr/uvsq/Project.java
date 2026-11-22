@@ -1,6 +1,5 @@
 package fr.uvsq;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,21 +11,16 @@ public class Project implements Operator {
 
   public Project(Operator input, List<String> columns) {
     this.input = input;
-    this.columns = columns;
+    this.columns = List.copyOf(columns);
   }
 
   @Override
   public Table execute() {
-    Table inTable = input.execute();
-    Table outTable = new Table(columns);
-    List<String> inCols = inTable.getColumns();
-    for (Row row : inTable.getRows()) {
-      List<Object> vals = new ArrayList<>();
-      for (String c : columns) {
-        vals.add(row.get(inCols.indexOf(c)));
-      }
-      outTable.addRow(new Row(vals));
-    }
-    return outTable;
+    Table in = input.execute();
+    List<Integer> indexes = columns.stream().map(in::getColumnIndex).toList();
+    List<Row> rows = in.getRows().stream()
+        .map(row -> new Row(indexes.stream().map(row::get).toList()))
+        .toList();
+    return new Table(columns, rows);
   }
 }

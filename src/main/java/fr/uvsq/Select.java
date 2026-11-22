@@ -1,5 +1,7 @@
 package fr.uvsq;
 
+import java.util.List;
+
 /**
  * Sélection des lignes qui vérifient un prédicat.
  */
@@ -14,13 +16,10 @@ public class Select implements Operator {
 
   @Override
   public Table execute() {
-    Table inputTable = input.execute();
-    Table result = new Table(inputTable.getColumns());
-    for (Row row : inputTable.getRows()) {
-      if (predicate.test(row, inputTable)) {
-        result.addRow(row);
-      }
-    }
-    return result;
+    Table in = input.execute();
+    List<Row> rows = in.getRows().stream()
+        .filter(row -> predicate.test(row, in))
+        .toList();
+    return new Table(in.getColumns(), rows);
   }
 }
