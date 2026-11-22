@@ -3,7 +3,6 @@ target/
 pom.xml.versionsBackup
 dependency-reduced-pom.xml
 build/
-.mvn/
 
 # Fichiers de configuration IDE
 .idea/
