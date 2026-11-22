@@ -28,7 +28,11 @@ public final class CsvUtils {
     Stream<String> body = table.getRows().stream()
         .map(row -> row.getValues().stream().map(Object::toString)
             .collect(Collectors.joining(",")));
-    Files.write(Path.of(filename), Stream.concat(header, body).toList());
+    Path path = Path.of(filename);
+    if (path.getParent() != null) {
+      Files.createDirectories(path.getParent());
+    }
+    Files.write(path, Stream.concat(header, body).toList());
   }
 
   /**
