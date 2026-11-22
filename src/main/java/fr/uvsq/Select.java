@@ -9,6 +9,7 @@ public class Select implements Operator {
   private final Operator input;
   private final PredicateParser.RowPredicate predicate;
 
+  /** Crée une sélection sur le résultat de input. */
   public Select(Operator input, PredicateParser.RowPredicate predicate) {
     this.input = input;
     this.predicate = predicate;

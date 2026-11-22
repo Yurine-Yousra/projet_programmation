@@ -32,6 +32,7 @@ public class PlanBuilder {
         node.get("onLeft").getAsString(), node.get("onRight").getAsString()));
   }
 
+  /** Associe un type d'opérateur à sa fabrique. */
   public final void register(String type, OperatorFactory factory) {
     factories.put(type, factory);
   }

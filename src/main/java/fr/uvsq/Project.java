@@ -9,6 +9,7 @@ public class Project implements Operator {
   private final Operator input;
   private final List<String> columns;
 
+  /** Crée une projection sur les colonnes données. */
   public Project(Operator input, List<String> columns) {
     this.input = input;
     this.columns = List.copyOf(columns);

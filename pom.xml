@@ -54,7 +54,7 @@
           <consoleOutput>true</consoleOutput>
           <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <violationSeverity>warning</violationSeverity>
-          <failOnViolation>false</failOnViolation>
+          <failOnViolation>true</failOnViolation>
         </configuration>
         <executions>
           <execution>

@@ -6,6 +6,7 @@ package fr.uvsq;
 public class Scan implements Operator {
   private final Table table;
 
+  /** Crée un scan de la table donnée. */
   public Scan(Table table) {
     this.table = table;
   }

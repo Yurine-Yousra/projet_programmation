@@ -1,49 +1,67 @@
 package fr.uvsq;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-public class ExecutePlan {
-    public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Usage: java ExecutePlan config.json");
-            return;
-        }
-        // String csvPath2 = "/disk1/tag/ly/Documents/ens/form/cplProg/td/mkTD/cp4_alg_noter/chkPrjEtu/results/td4-miniprojet-uvsq22507989/TSelect_output.csv";
-        // Table t2 = CSVUtils.readCSV(csvPath2);  // lecture CSV → Table
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-        String configFile = args[0];
+/**
+ * Point d'entrée : exécute la requête JSON passée en argument.
+ */
+public final class ExecutePlan {
 
-        // Lire le fichier JSON
-        JsonObject config = JsonParser.parseString(Files.readString(Path.of(configFile))).getAsJsonObject();
+  private ExecutePlan() {
+  }
 
-        // Charger les tables
-        JsonObject tablesJson = config.getAsJsonObject("tables");
-        Map<String, Table> tables = new HashMap<>();
-        for (String tableName : tablesJson.keySet()) {
-            String csvPath = tablesJson.get(tableName).getAsString();
-            Table t = CSVUtils.readCSV(csvPath);  // lecture CSV → Table
-            tables.put(tableName, t);
-        }
-
-        // Construire le plan
-        JsonObject planJson = config.getAsJsonObject("plan");
-        PlanBuilder builder = new PlanBuilder(tables);
-        Operator plan = builder.build(planJson);
-
-        // Exécuter le plan → Table finale
-        Table resultTable = plan.execute();
-
-        // Fichier de sortie
-        String outputFile = config.has("output") ? config.get("output").getAsString() : "results/output.csv";
-
-        // Écrire le CSV avec schéma
-        CSVUtils.writeCSV(outputFile, resultTable);
-
-        System.out.println("Résultat écrit dans " + outputFile);
+  /**
+   * Lance l'exécution.
+   *
+   * @param args le fichier JSON de la requête
+   * @throws IOException en cas d'erreur de lecture ou d'écriture
+   */
+  public static void main(String[] args) throws IOException {
+    if (args.length != 1) {
+      System.out.println("Usage: java -jar td4_alg.jar requete.json");
+      return;
     }
+    String output = run(args[0]);
+    System.out.println("Résultat écrit dans " + output);
+  }
+
+  /**
+   * Charge les tables, construit le plan, l'exécute et écrit le résultat.
+   *
+   * @param configFile chemin du fichier JSON
+   * @return chemin du fichier CSV produit
+   * @throws IOException en cas d'erreur de lecture ou d'écriture
+   */
+  public static String run(String configFile) throws IOException {
+    JsonObject config = JsonParser.parseString(Files.readString(Path.of(configFile)))
+        .getAsJsonObject();
+
+    JsonObject tablesJson = config.getAsJsonObject("tables");
+    Map<String, Table> tables = tablesJson.keySet().stream()
+        .collect(Collectors.toMap(name -> name,
+            name -> load(tablesJson.get(name).getAsString())));
+
+    Operator plan = new PlanBuilder(tables).build(config.getAsJsonObject("plan"));
+    Table result = plan.execute();
+
+    String output = config.has("output")
+        ? config.get("output").getAsString() : "results/output.csv";
+    CsvUtils.writeCsv(output, result);
+    return output;
+  }
+
+  private static Table load(String csvPath) {
+    try {
+      return CsvUtils.readCsv(csvPath);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
 }
