@@ -86,6 +86,28 @@
         </configuration>
       </plugin>
 
+      <!-- Couverture de code, rapport dans target/site/jacoco -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.14</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- JAR exécutable incluant toutes les dépendances -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
