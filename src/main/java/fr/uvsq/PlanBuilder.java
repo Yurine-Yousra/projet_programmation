@@ -33,6 +33,8 @@ public class PlanBuilder {
     register("UNION", (node, b) -> new Union(b.input(node, "left"), b.input(node, "right")));
     register("INTERSECTION", (node, b) -> new Intersection(b.input(node, "left"),
         b.input(node, "right")));
+    register("DIFFERENCE", (node, b) -> new Difference(b.input(node, "left"),
+        b.input(node, "right")));
   }
 
   /** Associe un type d'opérateur à sa fabrique. */
