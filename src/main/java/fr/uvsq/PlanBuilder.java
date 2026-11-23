@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -35,6 +36,7 @@ public class PlanBuilder {
         b.input(node, "right")));
     register("DIFFERENCE", (node, b) -> new Difference(b.input(node, "left"),
         b.input(node, "right")));
+    register("AGGREGATE", PlanBuilder::aggregate);
   }
 
   /** Associe un type d'opérateur à sa fabrique. */
@@ -67,6 +69,15 @@ public class PlanBuilder {
       throw new IllegalArgumentException("Table inconnue : " + name);
     }
     return t;
+  }
+
+  private static Operator aggregate(JsonObject node, PlanBuilder b) {
+    AggregateFunction function = AggregateFunction.of(node.get("function").getAsString());
+    String column = node.has("column") ? node.get("column").getAsString() : null;
+    List<String> groupBy = node.has("groupBy") ? strings(node, "groupBy") : List.of();
+    String alias = node.has("as") ? node.get("as").getAsString()
+        : function.name().toLowerCase(Locale.ROOT) + (column == null ? "" : "_" + column);
+    return new Aggregate(b.input(node, "input"), groupBy, function, column, alias);
   }
 
   static List<String> strings(JsonObject node, String field) {
