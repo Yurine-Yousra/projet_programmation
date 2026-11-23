@@ -31,6 +31,8 @@ public class PlanBuilder {
     register("JOIN", (node, b) -> new Join(b.input(node, "left"), b.input(node, "right"),
         node.get("onLeft").getAsString(), node.get("onRight").getAsString()));
     register("UNION", (node, b) -> new Union(b.input(node, "left"), b.input(node, "right")));
+    register("INTERSECTION", (node, b) -> new Intersection(b.input(node, "left"),
+        b.input(node, "right")));
   }
 
   /** Associe un type d'opérateur à sa fabrique. */
