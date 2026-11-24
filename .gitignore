@@ -29,3 +29,6 @@ tmp/
 
 # Fichiers de configuration locaux
 .env
+
+# Sortie produite en lançant le jar depuis la racine
+results/output.csv

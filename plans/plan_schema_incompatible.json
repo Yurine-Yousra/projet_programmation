@@ -1,0 +1,11 @@
+{
+  "tables": {
+    "users": "data/users.csv",
+    "orders": "data/orders.csv"
+  },
+  "plan": {
+    "type": "UNION",
+    "left": {"type": "SCAN", "table": "users"},
+    "right": {"type": "SCAN", "table": "orders"}
+  }
+}

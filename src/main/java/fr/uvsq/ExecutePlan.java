@@ -42,19 +42,20 @@ public final class ExecutePlan {
   public static String run(String configFile) throws IOException {
     JsonObject config = JsonParser.parseString(Files.readString(Path.of(configFile)))
         .getAsJsonObject();
+    Table result = evaluate(config);
+    String output = config.has("output")
+        ? config.get("output").getAsString() : "results/output.csv";
+    CsvUtils.writeCsv(output, result);
+    return output;
+  }
 
+  static Table evaluate(JsonObject config) {
     JsonObject tablesJson = config.getAsJsonObject("tables");
     Map<String, Table> tables = tablesJson.keySet().stream()
         .collect(Collectors.toMap(name -> name,
             name -> load(tablesJson.get(name).getAsString())));
 
-    Operator plan = new PlanBuilder(tables).build(config.getAsJsonObject("plan"));
-    Table result = plan.execute();
-
-    String output = config.has("output")
-        ? config.get("output").getAsString() : "results/output.csv";
-    CsvUtils.writeCsv(output, result);
-    return output;
+    return new PlanBuilder(tables).build(config.getAsJsonObject("plan")).execute();
   }
 
   private static Table load(String csvPath) {
