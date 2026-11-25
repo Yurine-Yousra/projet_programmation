@@ -262,7 +262,7 @@ R = PROJ R2 name amount
 * Dans `Row`, j'ai ajouté `equals` et `hashCode` pour pouvoir comparer les lignes.
 * J'ai renommé `CSVUtils` en `CsvUtils` pour respecter les conventions Google. J'ai aussi amélioré la lecture des CSV et ajouté la création du dossier de sortie si nécessaire.
 * Dans `PredicateParser`, j'ai remplacé la classe anonyme par une lambda. Les opérateurs inconnus sont maintenant refusés dès l'analyse.
-* Dans `ExecutePlan`, j'ai utilisé un stream pour lire les tables et séparé l'évaluation de l'écriture pour faciliter les tests. J'ai aussi amélioré les messages d'erreur.
+* Dans `ExecutePlan`, j'ai utilisé un stream pour lire les tables et séparé l'évaluation de l'écriture pour faciliter les tests. J'ai aussi amélioré les messages d'erreur et ajouté la détection de l'extension `.alg`.
 
 > Quelles nouvelles classes avez-vous ajoutées et quel est leur rôle ?
 
@@ -270,6 +270,7 @@ R = PROJ R2 name amount
 * J'ai créé `SetOperation` pour regrouper ce qui est commun aux classes `Union`, `Intersection` et `Difference`.
 * `SchemaMismatchException` permet de signaler que deux relations n'ont pas le même schéma.
 * `Aggregate` gère l'agrégation avec regroupement et `AggregateFunction` représente les fonctions COUNT, SUM, AVG, MIN et MAX.
+* `AlgTranslator` traduit un fichier `.alg` en requête JSON, sans l'exécuter.
 
 > Comment avez-vous intégré les nouveaux opérateurs (UNION, INTERSECTION, DIFFERENCE et l’agrégation) au mécanisme d’évaluation existant ?
 
@@ -284,6 +285,7 @@ Je compare les listes de valeurs des deux `Row` avec `List.equals`. Les valeurs 
 * `UnionTest`, `IntersectionTest` et `DifferenceTest` vérifient les résultats, les doublons et les schémas incompatibles.
 * Dans `AggregateTest`, je teste les différentes fonctions avec et sans `groupBy`, ainsi que les cas d'erreur.
 * Avec `ExecutePlanTest`, je lance les plans de `plans/` sur les données de `data/` et je compare les résultats avec ceux de `expected/`.
+* `AlgTranslatorTest` compare la traduction des deux exemples de l'énoncé au JSON attendu et vérifie que le résultat est exécutable.
 * J'ai aussi ajouté des tests sur le code existant : `PredicateParserTest`, `CsvUtilsTest`, `PlanBuilderTest` et `RowTableTest`.
 
 > Quelles bibliothèques ont été utilisées et pourquoi ?
@@ -304,6 +306,7 @@ J'utilise Gson pour lire les requêtes JSON et JUnit 5 pour les tests. Pour le b
 * `CsvUtils` s'occupe de lire et d'écrire les CSV.
 * `Table` et `Row` représentent les données en mémoire.
 * `PredicateParser` transforme une expression comme `"age < 25"` en prédicat.
+* `AlgTranslator` transforme une requête `.alg` en fichier JSON.
 * Chaque classe d'opérateur réalise une étape du plan.
 
 > Pourquoi Json est bien/pas bien adapté pour l'interprétation un plan d'execution ?
@@ -312,7 +315,7 @@ Je trouve que JSON est assez adapté ici, car le plan est un arbre et on peut fa
 
 > Quelles classes avez vous utilisées pour la lecture d'un Json ?
 
-J'ai utilisé `JsonParser`, `JsonObject`, `JsonArray` et `JsonElement` de Gson.
+J'ai utilisé `JsonParser`, `JsonObject`, `JsonArray` et `JsonElement` de Gson. Pour écrire le JSON traduit depuis un `.alg`, j'utilise `GsonBuilder`.
 
 > Comment consulter le rapport de couverture de code par les tests ?
 
@@ -332,7 +335,7 @@ Une `Table` contient la liste des noms de colonnes et chaque `Row` contient une 
 
 > Quelles évolutions peut-on envisager ?
 
-On pourrait ajouter des prédicats avec AND, OR et NOT, un tri avec ORDER BY ou plusieurs agrégats dans une même requête. On pourrait aussi mieux gérer les valeurs vides dans les CSV et ajouter la traduction des fichiers `.alg` en JSON.
+On pourrait ajouter des prédicats avec AND, OR et NOT, un tri avec ORDER BY ou plusieurs agrégats dans une même requête. On pourrait aussi mieux gérer les valeurs vides dans les CSV et ajouter l'agrégation dans la syntaxe `.alg`.
 
 == Références
 * Quelques bibliothèques :

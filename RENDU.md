@@ -5,7 +5,8 @@
 - Remplacement du `switch` dans `PlanBuilder` par un registre d'opérateurs.
 - Utilisation des streams et séparation des opérateurs dans leurs propres classes.
 - Ajout de `UNION`, `INTERSECTION`, `DIFFERENCE` et `AGGREGATE`.
-- 67 tests JUnit 5, 95 % de couverture des lignes et aucune violation Checkstyle.
+- Traduction des fichiers `.alg` en JSON.
+- 81 tests JUnit 5, 95 % de couverture des lignes et aucune violation Checkstyle.
 
 ## 1. Modifications apportées au code
 
@@ -51,7 +52,25 @@ Voici un exemple pour calculer le montant total des commandes par utilisateur :
 
 Pour les opérations ensemblistes, deux lignes sont considérées comme identiques si elles contiennent les mêmes valeurs dans le même ordre (`Row.equals`). Les deux tables doivent également avoir les mêmes colonnes dans le même ordre, sinon une `SchemaMismatchException` est levée.
 
-## 3. Tests et validation
+## 3. Traduction des fichiers `.alg`
+
+Si l'argument se termine par `.alg`, `AlgTranslator` écrit le fichier JSON correspondant sans exécuter la requête. Les mots-clés sont `SELECT`, `PROJ`, `JOIN`, `UNION`, `INTER` et `DIFF`. La dernière ligne donne la racine du plan.
+
+```
+$ cat alg/reqProjSel.alg
+users: data/users.csv
+orders: data/orders.csv
+
+R1 = SELECT users age < 25
+R = PROJ R1 name
+
+$ java -jar target/td4_alg-1.0-SNAPSHOT-jar-with-dependencies.jar alg/reqProjSel.alg
+Traduction en alg/reqProjSel.json
+$ java -jar target/td4_alg-1.0-SNAPSHOT-jar-with-dependencies.jar alg/reqProjSel.json
+Résultat écrit dans results/output.csv
+```
+
+## 4. Tests et validation
 
 Pour tester les opérateurs, j'ai utilisé les fichiers CSV suivants dans le dossier `data/` :
 
@@ -83,13 +102,14 @@ Voici une partie de la sortie obtenue avec `./mvnw clean package` :
 [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.IntersectionTest
 [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.DifferenceTest
 [INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.ExecutePlanTest
-[INFO] Tests run: 67, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.AlgTranslatorTest
+[INFO] Tests run: 81, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
-Les 67 tests passent. Avec JaCoCo, j'obtiens une couverture de 95 % des lignes et de 83 % des branches. Le rapport est disponible dans `target/site/jacoco/index.html`.
+Les 81 tests passent. Avec JaCoCo, j'obtiens une couverture de 95 % des lignes et de 85 % des branches. Le rapport est disponible dans `target/site/jacoco/index.html`.
 
-## 4. Lancer le projet
+## 5. Lancer le projet
 
 Pour compiler le projet et exécuter, par exemple, le plan d'agrégation :
 
