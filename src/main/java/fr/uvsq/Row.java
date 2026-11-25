@@ -2,9 +2,7 @@ package fr.uvsq;
 
 import java.util.List;
 
-/**
- * Ligne d'une table : liste immuable de valeurs.
- */
+/** Ligne d'une table : liste immuable de valeurs. */
 public class Row {
   private final List<Object> values;
 
@@ -23,12 +21,7 @@ public class Row {
     return (int) values.get(index);
   }
 
-  /**
-   * Renvoie la valeur en float si elle est décimale.
-   *
-   * @param index position de la valeur
-   * @return la valeur convertie
-   */
+  /** Renvoie la valeur en float si elle est décimale. */
   public float getFloat(int index) {
     Object v = values.get(index);
     if (v instanceof Float f) {

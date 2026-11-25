@@ -30,12 +30,6 @@ public abstract class SetOperation implements Operator {
     return new Table(l.getColumns(), rows);
   }
 
-  /**
-   * Calcule les lignes du résultat, éventuellement avec des doublons.
-   *
-   * @param left lignes de gauche
-   * @param right lignes de droite
-   * @return les lignes à garder
-   */
+  /** Calcule les lignes du résultat, éventuellement avec des doublons. */
   protected abstract List<Row> combine(List<Row> left, List<Row> right);
 }

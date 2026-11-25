@@ -3,9 +3,7 @@ package fr.uvsq;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Union de deux relations de même schéma.
- */
+/** Union de deux relations de même schéma. */
 public class Union extends SetOperation {
 
   /** Crée l'union de left et right. */

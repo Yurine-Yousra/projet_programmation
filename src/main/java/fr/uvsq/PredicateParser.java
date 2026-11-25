@@ -14,21 +14,14 @@ public final class PredicateParser {
   private PredicateParser() {
   }
 
-  /**
-   * Prédicat évalué sur une ligne de table.
-   */
+  /** Prédicat évalué sur une ligne de table. */
   @FunctionalInterface
   public interface RowPredicate {
     /** Indique si la ligne vérifie le prédicat. */
     boolean test(Row row, Table table);
   }
 
-  /**
-   * Transforme l'expression en prédicat.
-   *
-   * @param expr expression en trois parties séparées par des espaces
-   * @return le prédicat correspondant
-   */
+  /** Transforme l'expression en prédicat. */
   public static RowPredicate parse(String expr) {
     String[] parts = expr.trim().split("\\s+", 3);
     if (parts.length != 3) {

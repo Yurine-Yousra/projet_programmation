@@ -10,19 +10,13 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Point d'entrée : exécute la requête JSON passée en argument.
- */
+/** Point d'entrée : exécute la requête JSON passée en argument. */
 public final class ExecutePlan {
 
   private ExecutePlan() {
   }
 
-  /**
-   * Lance l'exécution.
-   *
-   * @param args le fichier JSON de la requête
-   */
+  /** Lance l'exécution. */
   public static void main(String[] args) {
     if (args.length != 1) {
       System.out.println("Usage: java -jar td4_alg.jar requete.json");
@@ -39,13 +33,7 @@ public final class ExecutePlan {
     }
   }
 
-  /**
-   * Charge les tables, construit le plan, l'exécute et écrit le résultat.
-   *
-   * @param configFile chemin du fichier JSON
-   * @return chemin du fichier CSV produit
-   * @throws IOException en cas d'erreur de lecture ou d'écriture
-   */
+  /** Charge les tables, construit le plan, l'exécute et écrit le résultat. */
   public static String run(String configFile) throws IOException {
     JsonObject config = JsonParser.parseString(Files.readString(Path.of(configFile)))
         .getAsJsonObject();

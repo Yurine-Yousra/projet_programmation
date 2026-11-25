@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Différence de deux relations de même schéma.
- */
+/** Différence de deux relations de même schéma. */
 public class Difference extends SetOperation {
 
   /** Crée la différence left moins right. */

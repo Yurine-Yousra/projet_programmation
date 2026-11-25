@@ -6,13 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Agrégation avec regroupement facultatif, comme GROUP BY en SQL.
- *
- * <p>Le résultat contient les colonnes de regroupement puis une colonne
- * avec la valeur agrégée. Les groupes gardent l'ordre de leur première
- * apparition.
- */
+/** Agrégation avec regroupement facultatif, comme GROUP BY en SQL. */
 public class Aggregate implements Operator {
   private final Operator input;
   private final List<String> groupBy;
@@ -20,15 +14,7 @@ public class Aggregate implements Operator {
   private final String column;
   private final String alias;
 
-  /**
-   * Crée une agrégation.
-   *
-   * @param input sous-plan
-   * @param groupBy colonnes de regroupement, éventuellement vide
-   * @param function fonction à appliquer
-   * @param column colonne agrégée, peut être null pour COUNT
-   * @param alias nom de la colonne résultat
-   */
+  /** Crée une agrégation. */
   public Aggregate(Operator input, List<String> groupBy, AggregateFunction function,
       String column, String alias) {
     if (column == null && function != AggregateFunction.COUNT) {

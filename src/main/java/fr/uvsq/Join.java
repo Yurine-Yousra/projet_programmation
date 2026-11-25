@@ -6,18 +6,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-/**
- * Équi-jointure entre deux tables.
- */
+/** Équi-jointure entre deux tables. */
 public class Join implements Operator {
   private final Operator left;
   private final Operator right;
   private final String leftCol;
   private final String rightCol;
 
-  /**
-   * Crée une jointure sur l'égalité leftCol = rightCol.
-   */
+  /** Crée une jointure sur l'égalité leftCol = rightCol. */
   public Join(Operator left, Operator right, String leftCol, String rightCol) {
     this.left = left;
     this.right = right;
@@ -32,7 +28,6 @@ public class Join implements Operator {
     int leftIdx = l.getColumnIndex(leftCol);
     int rightIdx = r.getColumnIndex(rightCol);
 
-    // colonnes de droite absentes à gauche
     List<Integer> keptRight = IntStream.range(0, r.getColumns().size())
         .filter(i -> !l.getColumns().contains(r.getColumns().get(i)))
         .boxed()
@@ -45,9 +40,13 @@ public class Join implements Operator {
 
     List<Row> rows = l.getRows().stream()
         .flatMap(lrow -> index.getOrDefault(lrow.get(leftIdx), List.of()).stream()
-            .map(rrow -> new Row(Stream.concat(lrow.getValues().stream(),
-                keptRight.stream().map(rrow::get)).toList())))
+            .map(rrow -> merge(lrow, rrow, keptRight)))
         .toList();
     return new Table(columns, rows);
+  }
+
+  private static Row merge(Row left, Row right, List<Integer> keptRight) {
+    return new Row(Stream.concat(left.getValues().stream(),
+        keptRight.stream().map(right::get)).toList());
   }
 }

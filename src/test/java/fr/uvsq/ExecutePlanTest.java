@@ -15,9 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/**
- * Exécute les plans du dossier plans sur les données du dossier data.
- */
+/** Exécute les plans du dossier plans sur les données du dossier data. */
 class ExecutePlanTest {
 
   private static JsonObject read(String plan) throws IOException {

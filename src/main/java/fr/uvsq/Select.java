@@ -2,9 +2,7 @@ package fr.uvsq;
 
 import java.util.List;
 
-/**
- * Sélection des lignes qui vérifient un prédicat.
- */
+/** Sélection des lignes qui vérifient un prédicat. */
 public class Select implements Operator {
   private final Operator input;
   private final PredicateParser.RowPredicate predicate;

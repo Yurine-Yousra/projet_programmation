@@ -7,21 +7,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Construit un plan d'exécution à partir de sa description JSON.
- *
- * <p>Chaque type d'opérateur est associé à une fabrique dans un registre.
- * Ajouter un opérateur revient à appeler {@link #register}.
- */
+/** Construit un plan d'exécution à partir de sa description JSON. */
 public class PlanBuilder {
   private final Map<String, Table> tables;
   private final Map<String, OperatorFactory> factories = new HashMap<>();
 
-  /**
-   * Crée un constructeur de plan avec les opérateurs de base.
-   *
-   * @param tables tables disponibles, par nom
-   */
+  /** Crée un constructeur de plan avec les opérateurs de base. */
   public PlanBuilder(Map<String, Table> tables) {
     this.tables = Map.copyOf(tables);
     register("SCAN", (node, b) -> new Scan(b.table(text(node, "table"))));
@@ -44,12 +35,7 @@ public class PlanBuilder {
     factories.put(type, factory);
   }
 
-  /**
-   * Construit l'opérateur décrit par le noeud et ses sous-plans.
-   *
-   * @param node noeud JSON
-   * @return la racine du plan
-   */
+  /** Construit l'opérateur décrit par le noeud et ses sous-plans. */
   public Operator build(JsonObject node) {
     String type = text(node, "type");
     OperatorFactory factory = factories.get(type);

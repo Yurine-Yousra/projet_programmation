@@ -1,8 +1,6 @@
 package fr.uvsq;
 
-/**
- * Lecture d'une table chargée en mémoire.
- */
+/** Lecture d'une table chargée en mémoire. */
 public class Scan implements Operator {
   private final Table table;
 

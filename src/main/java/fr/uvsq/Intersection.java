@@ -4,9 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Intersection de deux relations de même schéma.
- */
+/** Intersection de deux relations de même schéma. */
 public class Intersection extends SetOperation {
 
   /** Crée l'intersection de left et right. */

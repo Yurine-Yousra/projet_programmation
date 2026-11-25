@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.DoubleStream;
 
-/**
- * Fonctions d'agrégation disponibles pour l'opérateur AGGREGATE.
- */
+/** Fonctions d'agrégation disponibles pour l'opérateur AGGREGATE. */
 public enum AggregateFunction {
   COUNT {
     @Override
@@ -44,7 +42,6 @@ public enum AggregateFunction {
     }
   };
 
-  // nombres comparés par valeur, sinon ordre alphabétique
   private static final Comparator<Object> ORDER = (a, b) ->
       a instanceof Number x && b instanceof Number y
           ? Double.compare(x.doubleValue(), y.doubleValue())
@@ -52,13 +49,7 @@ public enum AggregateFunction {
 
   abstract Object apply(List<Object> values);
 
-  /**
-   * Renvoie la fonction correspondant au nom, sans tenir compte de la casse.
-   *
-   * @param name nom de la fonction, par exemple "sum"
-   * @return la fonction
-   * @throws IllegalArgumentException si le nom est inconnu
-   */
+  /** Renvoie la fonction correspondant au nom, sans tenir compte de la casse. */
   public static AggregateFunction of(String name) {
     try {
       return valueOf(name.toUpperCase(Locale.ROOT));

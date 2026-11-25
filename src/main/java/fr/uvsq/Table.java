@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Table en mémoire : un schéma (noms de colonnes) et des lignes.
- */
+/** Table en mémoire : un schéma (noms de colonnes) et des lignes. */
 public class Table {
   private final List<String> columns;
   private final List<Row> rows;
@@ -22,13 +20,7 @@ public class Table {
     this.rows = new ArrayList<>(rows);
   }
 
-  /**
-   * Renvoie la position d'une colonne.
-   *
-   * @param colName nom de la colonne
-   * @return son index
-   * @throws IllegalArgumentException si la colonne n'existe pas
-   */
+  /** Renvoie la position d'une colonne. */
   public int getColumnIndex(String colName) {
     int idx = columns.indexOf(colName);
     if (idx == -1) {

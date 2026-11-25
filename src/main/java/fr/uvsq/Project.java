@@ -2,9 +2,7 @@ package fr.uvsq;
 
 import java.util.List;
 
-/**
- * Projection sur une liste de colonnes.
- */
+/** Projection sur une liste de colonnes. */
 public class Project implements Operator {
   private final Operator input;
   private final List<String> columns;
