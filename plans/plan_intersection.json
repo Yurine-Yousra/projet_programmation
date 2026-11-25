@@ -1,0 +1,18 @@
+{
+  "tables": {
+    "users": "data/users.csv"
+  },
+  "plan": {
+    "type": "INTERSECTION",
+    "left": {
+      "type": "SELECT",
+      "predicate": "age < 28",
+      "input": {"type": "SCAN", "table": "users"}
+    },
+    "right": {
+      "type": "SELECT",
+      "predicate": "age > 20",
+      "input": {"type": "SCAN", "table": "users"}
+    }
+  }
+}

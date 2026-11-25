@@ -1,6 +1,6 @@
 = Un Mini Moteur Algébrique etendu
 
-Votre NC: ..... et Nom: ...
+Votre NC: 86 et Nom: BOUHRIZ DAIDJ Yousra
 
 Projet individuel.
 
@@ -254,36 +254,88 @@ R = PROJ R2 name amount
 
 
 == À compléter ici:
+
 > Quelles classes existantes avez-vous modifiées et pourquoi ?
+
+* Dans `PlanBuilder`, j'ai remplacé le `switch` par un registre de fabriques. Comme ça, je peux ajouter un opérateur sans modifier `build()`.
+* J'ai réécrit `Select`, `Project` et `Join` avec les streams et séparé les classes qui étaient regroupées dans `Operators.java`.
+* Dans `Row`, j'ai ajouté `equals` et `hashCode` pour pouvoir comparer les lignes.
+* J'ai renommé `CSVUtils` en `CsvUtils` pour respecter les conventions Google. J'ai aussi amélioré la lecture des CSV et ajouté la création du dossier de sortie si nécessaire.
+* Dans `PredicateParser`, j'ai remplacé la classe anonyme par une lambda. Les opérateurs inconnus sont maintenant refusés dès l'analyse.
+* Dans `ExecutePlan`, j'ai utilisé un stream pour lire les tables et séparé l'évaluation de l'écriture pour faciliter les tests. J'ai aussi amélioré les messages d'erreur et ajouté la détection de l'extension `.alg`.
 
 > Quelles nouvelles classes avez-vous ajoutées et quel est leur rôle ?
 
+* `OperatorFactory` sert à créer un opérateur à partir de son noeud JSON.
+* J'ai créé `SetOperation` pour regrouper ce qui est commun aux classes `Union`, `Intersection` et `Difference`.
+* `SchemaMismatchException` permet de signaler que deux relations n'ont pas le même schéma.
+* `Aggregate` gère l'agrégation avec regroupement et `AggregateFunction` représente les fonctions COUNT, SUM, AVG, MIN et MAX.
+* `AlgTranslator` traduit un fichier `.alg` en requête JSON, sans l'exécuter.
+
 > Comment avez-vous intégré les nouveaux opérateurs (UNION, INTERSECTION, DIFFERENCE et l’agrégation) au mécanisme d’évaluation existant ?
+
+J'ai gardé l'interface `Operator` pour les nouveaux opérateurs. Il suffit de les enregistrer dans `PlanBuilder` avec leur nom JSON. Ils peuvent ensuite être utilisés dans un plan, seuls ou avec les autres opérateurs comme `SELECT` et `JOIN`.
 
 > Comment déterminez-vous que deux lignes sont identiques pour les opérateurs ensemblistes ?
 
+Je compare les listes de valeurs des deux `Row` avec `List.equals`. Les valeurs doivent être identiques et dans le même ordre. Pour enlever les doublons, j'utilise `distinct()`, qui repose sur `equals` et `hashCode`. Je vérifie aussi que les colonnes des deux tables sont identiques et dans le même ordre avant l'opération.
+
 > Quels tests avez-vous ajoutés pour vérifier les nouveaux opérateurs et que vérifient-ils ?
+
+* `UnionTest`, `IntersectionTest` et `DifferenceTest` vérifient les résultats, les doublons et les schémas incompatibles.
+* Dans `AggregateTest`, je teste les différentes fonctions avec et sans `groupBy`, ainsi que les cas d'erreur.
+* Avec `ExecutePlanTest`, je lance les plans de `plans/` sur les données de `data/` et je compare les résultats avec ceux de `expected/`.
+* `AlgTranslatorTest` compare la traduction des deux exemples de l'énoncé au JSON attendu et vérifie que le résultat est exécutable.
+* J'ai aussi ajouté des tests sur le code existant : `PredicateParserTest`, `CsvUtilsTest`, `PlanBuilderTest` et `RowTableTest`.
 
 > Quelles bibliothèques ont été utilisées et pourquoi ?
 
+J'utilise Gson pour lire les requêtes JSON et JUnit 5 pour les tests. Pour le build, il y a aussi Checkstyle pour les conventions Google, JaCoCo pour la couverture des tests et le plugin assembly pour générer le JAR avec ses dépendances.
+
 > Décrire les relations d'héritage ou autres entre vos classes
+
+* `Scan`, `Select`, `Project`, `Join` et `Aggregate` implémentent l'interface `Operator`.
+* `Union`, `Intersection` et `Difference` héritent de `SetOperation`, qui implémente aussi `Operator`.
+* Un opérateur peut contenir d'autres opérateurs, ce qui permet de construire le plan sous forme d'arbre.
+* Une `Table` contient des `Row`.
 
 > Quel est le rôle des différentes classes ?
 
+* `ExecutePlan` est le point d'entrée du programme. Il lit la requête et écrit le résultat dans `results/output.csv`.
+* `PlanBuilder` construit l'arbre d'opérateurs à partir du JSON.
+* `CsvUtils` s'occupe de lire et d'écrire les CSV.
+* `Table` et `Row` représentent les données en mémoire.
+* `PredicateParser` transforme une expression comme `"age < 25"` en prédicat.
+* `AlgTranslator` transforme une requête `.alg` en fichier JSON.
+* Chaque classe d'opérateur réalise une étape du plan.
+
 > Pourquoi Json est bien/pas bien adapté pour l'interprétation un plan d'execution ?
+
+Je trouve que JSON est assez adapté ici, car le plan est un arbre et on peut facilement représenter les opérateurs imbriqués. Gson facilite aussi sa lecture. Par contre, les requêtes deviennent assez longues à écrire à la main et une erreur dans un nom de champ peut n'être détectée qu'au moment de construire le plan.
 
 > Quelles classes avez vous utilisées pour la lecture d'un Json ?
 
+J'ai utilisé `JsonParser`, `JsonObject`, `JsonArray` et `JsonElement` de Gson. Pour écrire le JSON traduit depuis un `.alg`, j'utilise `GsonBuilder`.
+
 > Comment consulter le rapport de couverture de code par les tests ?
+
+Je lance `./mvnw test`, puis j'ouvre le fichier `target/site/jacoco/index.html` dans le navigateur.
 
 > Quels avantages apporte une approche de programmation non impérative, mais fonctionnelle, pour l'évaluation des requêtes dans votre projet ?
 
+Avec cette approche, chaque opérateur renvoie une nouvelle table sans modifier celle qu'il reçoit. On peut donc les enchaîner plus facilement. Les streams correspondent aussi assez bien aux opérations à réaliser : `filter` pour la sélection, `map` pour la projection et `flatMap` pour la jointure. Je trouve le code plus simple à lire et à tester.
+
 > Y a-t-il des bibliothèques Java qui permettraient de lire un fichier CSV et de l'instancier comme une collection ?
+
+Oui, il existe par exemple Apache Commons CSV, OpenCSV ou le module CSV de Jackson. Dans ce projet, les fichiers sont simples, sans guillemets ni virgules dans les valeurs, donc j'ai utilisé `split(",")`.
 
 > Comment avez-vous géré la variabilité du nombre de colonnes dans une table représentée dans une collection ?
 
+Une `Table` contient la liste des noms de colonnes et chaque `Row` contient une `List<Object>` de même taille. J'utilise `getColumnIndex` pour retrouver la position d'une colonne. Le nombre de colonnes n'est donc pas fixé à l'avance.
+
 > Quelles évolutions peut-on envisager ?
 
+On pourrait ajouter des prédicats avec AND, OR et NOT, un tri avec ORDER BY ou plusieurs agrégats dans une même requête. On pourrait aussi mieux gérer les valeurs vides dans les CSV et ajouter l'agrégation dans la syntaxe `.alg`.
 
 == Références
 * Quelques bibliothèques :
