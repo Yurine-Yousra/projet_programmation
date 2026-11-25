@@ -107,4 +107,28 @@ class AggregateTest {
 
     assertEquals(List.of(new Row(List.of(0))), result.getRows());
   }
+
+  @Test
+  void sumPeutDepasserUnInt() {
+    Table t = new Table(List.of("n"));
+    t.addRow(new Row(List.of(2000000000)));
+    t.addRow(new Row(List.of(2000000000)));
+
+    Table result = new Aggregate(new Scan(t), List.of(), AggregateFunction.SUM,
+        "n", "res").execute();
+
+    assertEquals(4000000000L, result.getRows().get(0).get(0));
+  }
+
+  @Test
+  void sumDeDecimauxRenvoieUnDecimal() {
+    Table t = new Table(List.of("n"));
+    t.addRow(new Row(List.of(1)));
+    t.addRow(new Row(List.of(2.5)));
+
+    Table result = new Aggregate(new Scan(t), List.of(), AggregateFunction.SUM,
+        "n", "res").execute();
+
+    assertEquals(3.5, result.getRows().get(0).get(0));
+  }
 }

@@ -73,12 +73,19 @@ public final class CsvUtils {
   }
 
   static Object parseValue(String s) {
-    if (s.matches("-?\\d+")) {
-      return Integer.parseInt(s);
+    if (s.matches("-?\\d{1,18}")) {
+      return toInteger(Long.parseLong(s));
     }
     if (s.matches("-?\\d*\\.\\d+")) {
       return Double.parseDouble(s);
     }
     return s;
+  }
+
+  static Object toInteger(long n) {
+    if (n == (int) n) {
+      return (int) n;
+    }
+    return n;
   }
 }

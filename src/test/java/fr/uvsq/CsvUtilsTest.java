@@ -83,4 +83,10 @@ class CsvUtilsTest {
 
     assertEquals(Files.readAllLines(Path.of("data/users.csv")), Files.readAllLines(out));
   }
+
+  @Test
+  void grandEntierEstLu() {
+    assertEquals(12345678901L, CsvUtils.parseValue("12345678901"));
+    assertEquals(-5, CsvUtils.parseValue("-5"));
+  }
 }

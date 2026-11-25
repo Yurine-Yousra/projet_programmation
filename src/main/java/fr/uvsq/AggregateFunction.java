@@ -18,8 +18,9 @@ public enum AggregateFunction {
   SUM {
     @Override
     Object apply(List<Object> values) {
-      if (values.stream().allMatch(Integer.class::isInstance)) {
-        return values.stream().mapToInt(Integer.class::cast).sum();
+      if (values.stream().allMatch(v -> v instanceof Integer || v instanceof Long)) {
+        return CsvUtils.toInteger(
+            values.stream().mapToLong(v -> ((Number) v).longValue()).sum());
       }
       return numbers(values).sum();
     }
