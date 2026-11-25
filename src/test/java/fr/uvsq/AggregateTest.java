@@ -98,4 +98,13 @@ class AggregateTest {
     assertThrows(IllegalArgumentException.class,
         () -> aggregate(List.of("pays"), AggregateFunction.COUNT, null));
   }
+
+  @Test
+  void countSurTableVideRenvoieZero() {
+    Scan vide = new Scan(new Table(List.of("id")));
+
+    Table result = new Aggregate(vide, List.of(), AggregateFunction.COUNT, null, "res").execute();
+
+    assertEquals(List.of(new Row(List.of(0))), result.getRows());
+  }
 }

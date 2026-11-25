@@ -52,6 +52,9 @@ public class Aggregate implements Operator {
             row -> keys.stream().map(row::get).toList(),
             LinkedHashMap::new,
             Collectors.toList()));
+    if (groups.isEmpty() && groupBy.isEmpty() && function == AggregateFunction.COUNT) {
+      groups.put(List.of(), List.of());
+    }
 
     List<Row> rows = groups.entrySet().stream()
         .map(e -> {
