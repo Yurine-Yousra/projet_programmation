@@ -6,7 +6,7 @@
 - Utilisation des streams et séparation des opérateurs dans leurs propres classes.
 - Ajout de `UNION`, `INTERSECTION`, `DIFFERENCE` et `AGGREGATE`.
 - Traduction des fichiers `.alg` en JSON.
-- 81 tests JUnit 5, 95 % de couverture des lignes et aucune violation Checkstyle.
+- 91 tests JUnit 5, 97 % de couverture des lignes et aucune violation Checkstyle.
 
 ## 1. Modifications apportées au code
 
@@ -54,7 +54,7 @@ Pour les opérations ensemblistes, deux lignes sont considérées comme identiqu
 
 ## 3. Traduction des fichiers `.alg`
 
-Si l'argument se termine par `.alg`, `AlgTranslator` écrit le fichier JSON correspondant sans exécuter la requête. Les mots-clés sont `SELECT`, `PROJ`, `JOIN`, `UNION`, `INTER` et `DIFF`. La dernière ligne donne la racine du plan.
+Si l'argument se termine par `.alg`, `AlgTranslator` écrit le fichier JSON correspondant sans exécuter la requête. Les mots-clés sont `SELECT`, `PROJ`, `JOIN`, `UNION`, `INTER` et `DIFF`. La dernière ligne donne la racine du plan. Comme dans `PlanBuilder`, chaque mot-clé est associé à sa règle de traduction dans un registre.
 
 ```
 $ cat alg/reqProjSel.alg
@@ -101,13 +101,13 @@ Voici une partie de la sortie obtenue avec `./mvnw clean package` :
 [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.UnionTest
 [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.IntersectionTest
 [INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.DifferenceTest
-[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.ExecutePlanTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.ExecutePlanTest
 [INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0 -- in fr.uvsq.AlgTranslatorTest
-[INFO] Tests run: 81, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 91, Failures: 0, Errors: 0, Skipped: 0
 [INFO] BUILD SUCCESS
 ```
 
-Les 81 tests passent. Avec JaCoCo, j'obtiens une couverture de 95 % des lignes et de 85 % des branches. Le rapport est disponible dans `target/site/jacoco/index.html`.
+Les 91 tests passent. Avec JaCoCo, j'obtiens une couverture de 97 % des lignes et de 86 % des branches. Le rapport est disponible dans `target/site/jacoco/index.html`.
 
 ## 5. Lancer le projet
 

@@ -6,9 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,5 +81,47 @@ class ExecutePlanTest {
         () -> ExecutePlan.evaluate(config));
 
     assertTrue(e.getMessage().contains("absent.csv"));
+  }
+
+  @Test
+  void processExecuteUneRequeteJson(@TempDir Path dir) throws IOException {
+    Path out = dir.resolve("out.csv");
+    JsonObject config = read("plan_union");
+    config.addProperty("output", out.toString());
+    Path json = dir.resolve("union.json");
+    Files.writeString(json, config.toString());
+
+    assertEquals("Résultat écrit dans " + out, ExecutePlan.process(json.toString()));
+    assertEquals(Files.readAllLines(Path.of("expected/plan_union_expected.csv")),
+        Files.readAllLines(out));
+  }
+
+  @Test
+  void processTraduitUnFichierAlg(@TempDir Path dir) throws IOException {
+    Path alg = dir.resolve("req.alg");
+    Files.copy(Path.of("alg/optJoin.alg"), alg);
+
+    assertEquals("Traduction en " + dir.resolve("req.json"), ExecutePlan.process(alg.toString()));
+    assertTrue(Files.exists(dir.resolve("req.json")));
+  }
+
+  @Test
+  void fichierAbsentEstSignale() {
+    assertThrows(NoSuchFileException.class, () -> ExecutePlan.process("absent.json"));
+    assertThrows(NoSuchFileException.class, () -> ExecutePlan.process("absent.alg"));
+  }
+
+  @Test
+  void mainSansArgumentAfficheUsage() {
+    PrintStream console = System.out;
+    ByteArrayOutputStream captured = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(captured, true, StandardCharsets.UTF_8));
+    try {
+      ExecutePlan.main(new String[0]);
+    } finally {
+      System.setOut(console);
+    }
+
+    assertTrue(captured.toString(StandardCharsets.UTF_8).startsWith("Usage"));
   }
 }

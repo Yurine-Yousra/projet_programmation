@@ -21,8 +21,19 @@ public final class AlgTranslator {
   private static final Gson GSON =
       new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
-  private static final Map<String, String> SET_OPERATIONS = Map.of(
-      "UNION", "UNION", "INTER", "INTERSECTION", "DIFF", "DIFFERENCE");
+  /** Traduction d'une ligne "nom = MOT-CLÉ arguments" en noeud JSON. */
+  @FunctionalInterface
+  private interface Rule {
+    JsonObject translate(AlgTranslator translator, String line, String[] words);
+  }
+
+  private static final Map<String, Rule> RULES = Map.of(
+      "SELECT", AlgTranslator::select,
+      "PROJ", AlgTranslator::project,
+      "JOIN", AlgTranslator::join,
+      "UNION", setOperation("UNION"),
+      "INTER", setOperation("INTERSECTION"),
+      "DIFF", setOperation("DIFFERENCE"));
 
   private final JsonObject tables = new JsonObject();
   private final Map<String, JsonObject> results = new HashMap<>();
@@ -70,39 +81,58 @@ public final class AlgTranslator {
   }
 
   private JsonObject operator(String line, String[] words) {
-    String name = words[2];
-    JsonObject node = new JsonObject();
-    if (name.equals("SELECT")) {
-      String[] parts = line.split("\\s+", 7);
-      check(parts.length == 7, line);
-      node.addProperty("type", "SELECT");
-      node.addProperty("predicate", parts[4] + " " + parts[5] + " " + parts[6]);
-      node.add("input", input(parts[3]));
-    } else if (name.equals("PROJ")) {
-      check(words.length >= 5, line);
-      JsonArray columns = new JsonArray();
-      Arrays.stream(words).skip(4).forEach(columns::add);
-      node.addProperty("type", "PROJECT");
-      node.add("columns", columns);
-      node.add("input", input(words[3]));
-    } else if (name.equals("JOIN")) {
-      check(words.length == 7, line);
-      binary(node, "JOIN", words);
-      node.addProperty("onLeft", words[5]);
-      node.addProperty("onRight", words[6]);
-    } else if (SET_OPERATIONS.containsKey(name)) {
-      check(words.length == 5, line);
-      binary(node, SET_OPERATIONS.get(name), words);
-    } else {
-      throw new IllegalArgumentException("Opérateur inconnu : " + name);
+    Rule rule = RULES.get(words[2]);
+    if (rule == null) {
+      throw new IllegalArgumentException("Opérateur inconnu : " + words[2]);
     }
+    return rule.translate(this, line, words);
+  }
+
+  private JsonObject select(String line, String[] words) {
+    String[] parts = line.split("\\s+", 7);
+    check(parts.length == 7, line);
+    JsonObject node = node("SELECT");
+    node.addProperty("predicate", parts[4] + " " + parts[5] + " " + parts[6]);
+    node.add("input", input(parts[3]));
     return node;
   }
 
-  private void binary(JsonObject node, String type, String[] words) {
-    node.addProperty("type", type);
+  private JsonObject project(String line, String[] words) {
+    check(words.length >= 5, line);
+    JsonArray columns = new JsonArray();
+    Arrays.stream(words).skip(4).forEach(columns::add);
+    JsonObject node = node("PROJECT");
+    node.add("columns", columns);
+    node.add("input", input(words[3]));
+    return node;
+  }
+
+  private JsonObject join(String line, String[] words) {
+    check(words.length == 7, line);
+    JsonObject node = binary("JOIN", words);
+    node.addProperty("onLeft", words[5]);
+    node.addProperty("onRight", words[6]);
+    return node;
+  }
+
+  private static Rule setOperation(String type) {
+    return (translator, line, words) -> {
+      check(words.length == 5, line);
+      return translator.binary(type, words);
+    };
+  }
+
+  private JsonObject binary(String type, String[] words) {
+    JsonObject node = node(type);
     node.add("left", input(words[3]));
     node.add("right", input(words[4]));
+    return node;
+  }
+
+  private static JsonObject node(String type) {
+    JsonObject node = new JsonObject();
+    node.addProperty("type", type);
+    return node;
   }
 
   private JsonObject input(String name) {
@@ -112,8 +142,7 @@ public final class AlgTranslator {
     if (!tables.has(name)) {
       throw new IllegalArgumentException("Relation inconnue : " + name);
     }
-    JsonObject scan = new JsonObject();
-    scan.addProperty("type", "SCAN");
+    JsonObject scan = node("SCAN");
     scan.addProperty("table", name);
     return scan;
   }
