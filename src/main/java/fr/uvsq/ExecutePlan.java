@@ -23,11 +23,7 @@ public final class ExecutePlan {
       return;
     }
     try {
-      if (args[0].endsWith(AlgTranslator.EXTENSION)) {
-        System.out.println("Traduction en " + AlgTranslator.translateFile(args[0]));
-      } else {
-        System.out.println("Résultat écrit dans " + run(args[0]));
-      }
+      System.out.println(process(args[0]));
     } catch (NoSuchFileException e) {
       System.err.println("Erreur : fichier introuvable " + e.getMessage());
       System.exit(1);
@@ -35,6 +31,14 @@ public final class ExecutePlan {
       System.err.println("Erreur : " + e.getMessage());
       System.exit(1);
     }
+  }
+
+  /** Traduit un fichier .alg ou exécute une requête JSON, et renvoie le message à afficher. */
+  static String process(String file) throws IOException {
+    if (file.endsWith(AlgTranslator.EXTENSION)) {
+      return "Traduction en " + AlgTranslator.translateFile(file);
+    }
+    return "Résultat écrit dans " + run(file);
   }
 
   /** Charge les tables, construit le plan, l'exécute et écrit le résultat. */
