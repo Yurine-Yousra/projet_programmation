@@ -24,13 +24,13 @@ public class PlanBuilder {
    */
   public PlanBuilder(Map<String, Table> tables) {
     this.tables = Map.copyOf(tables);
-    register("SCAN", (node, b) -> new Scan(b.table(node.get("table").getAsString())));
+    register("SCAN", (node, b) -> new Scan(b.table(text(node, "table"))));
     register("SELECT", (node, b) -> new Select(b.input(node, "input"),
-        PredicateParser.parse(node.get("predicate").getAsString())));
+        PredicateParser.parse(text(node, "predicate"))));
     register("PROJECT", (node, b) -> new Project(b.input(node, "input"),
         strings(node, "columns")));
     register("JOIN", (node, b) -> new Join(b.input(node, "left"), b.input(node, "right"),
-        node.get("onLeft").getAsString(), node.get("onRight").getAsString()));
+        text(node, "onLeft"), text(node, "onRight")));
     register("UNION", (node, b) -> new Union(b.input(node, "left"), b.input(node, "right")));
     register("INTERSECTION", (node, b) -> new Intersection(b.input(node, "left"),
         b.input(node, "right")));
@@ -51,7 +51,7 @@ public class PlanBuilder {
    * @return la racine du plan
    */
   public Operator build(JsonObject node) {
-    String type = node.get("type").getAsString();
+    String type = text(node, "type");
     OperatorFactory factory = factories.get(type);
     if (factory == null) {
       throw new IllegalArgumentException("Type inconnu : " + type);
@@ -60,7 +60,7 @@ public class PlanBuilder {
   }
 
   Operator input(JsonObject node, String field) {
-    return build(node.getAsJsonObject(field));
+    return build(required(node, field).getAsJsonObject());
   }
 
   Table table(String name) {
@@ -72,16 +72,28 @@ public class PlanBuilder {
   }
 
   private static Operator aggregate(JsonObject node, PlanBuilder b) {
-    AggregateFunction function = AggregateFunction.of(node.get("function").getAsString());
-    String column = node.has("column") ? node.get("column").getAsString() : null;
+    AggregateFunction function = AggregateFunction.of(text(node, "function"));
+    String column = node.has("column") ? text(node, "column") : null;
     List<String> groupBy = node.has("groupBy") ? strings(node, "groupBy") : List.of();
-    String alias = node.has("as") ? node.get("as").getAsString()
+    String alias = node.has("as") ? text(node, "as")
         : function.name().toLowerCase(Locale.ROOT) + (column == null ? "" : "_" + column);
     return new Aggregate(b.input(node, "input"), groupBy, function, column, alias);
   }
 
+  private static JsonElement required(JsonObject node, String field) {
+    JsonElement e = node.get(field);
+    if (e == null) {
+      throw new IllegalArgumentException("Champ \"" + field + "\" manquant dans " + node);
+    }
+    return e;
+  }
+
+  private static String text(JsonObject node, String field) {
+    return required(node, field).getAsString();
+  }
+
   static List<String> strings(JsonObject node, String field) {
-    return node.getAsJsonArray(field).asList().stream()
+    return required(node, field).getAsJsonArray().asList().stream()
         .map(JsonElement::getAsString)
         .toList();
   }

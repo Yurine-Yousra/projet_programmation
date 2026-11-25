@@ -3,6 +3,7 @@ package fr.uvsq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonParser;
 import java.util.List;
@@ -73,6 +74,21 @@ class PlanBuilderTest {
   void tableInconnueEstRefusee() {
     assertThrows(IllegalArgumentException.class, () -> build("""
         {"type": "SCAN", "table": "clients"}"""));
+  }
+
+  @Test
+  void champManquantDonneUnMessageClair() {
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> build("""
+            {"type": "SELECT", "input": %s}""".formatted(SCAN)));
+
+    assertTrue(e.getMessage().contains("predicate"));
+  }
+
+  @Test
+  void sousPlanManquantEstRefuse() {
+    assertThrows(IllegalArgumentException.class, () -> build("""
+        {"type": "UNION", "left": %s}""".formatted(SCAN)));
   }
 
   @Test

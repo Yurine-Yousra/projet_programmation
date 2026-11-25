@@ -21,15 +21,18 @@ public final class ExecutePlan {
    * Lance l'exécution.
    *
    * @param args le fichier JSON de la requête
-   * @throws IOException en cas d'erreur de lecture ou d'écriture
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     if (args.length != 1) {
       System.out.println("Usage: java -jar td4_alg.jar requete.json");
       return;
     }
-    String output = run(args[0]);
-    System.out.println("Résultat écrit dans " + output);
+    try {
+      System.out.println("Résultat écrit dans " + run(args[0]));
+    } catch (IOException | RuntimeException e) {
+      System.err.println("Erreur : " + e.getMessage());
+      System.exit(1);
+    }
   }
 
   /**
