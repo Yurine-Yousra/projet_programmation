@@ -37,24 +37,39 @@ public final class CsvUtils {
 
   /**
    * Lit un fichier CSV dont la première ligne donne les colonnes.
+   * Les lignes vides sont ignorées et les espaces autour des valeurs retirés.
    *
    * @param filename chemin du fichier
    * @return la table lue
    * @throws IOException en cas d'erreur de lecture
+   * @throws IllegalArgumentException si une ligne n'a pas le bon nombre de valeurs
    */
   public static Table readCsv(String filename) throws IOException {
-    List<String> lines = Files.readAllLines(Path.of(filename));
+    List<String> lines = Files.readAllLines(Path.of(filename)).stream()
+        .filter(line -> !line.isBlank())
+        .toList();
     if (lines.isEmpty()) {
       return new Table(List.of());
     }
-    List<String> columns = List.of(lines.get(0).split(","));
+    List<String> columns = split(lines.get(0));
     List<Row> rows = lines.stream()
         .skip(1)
-        .map(line -> new Row(Arrays.stream(line.split(","))
-            .map(CsvUtils::parseValue)
-            .toList()))
+        .map(line -> toRow(line, columns.size()))
         .toList();
     return new Table(columns, rows);
+  }
+
+  private static Row toRow(String line, int width) {
+    List<String> values = split(line);
+    if (values.size() != width) {
+      throw new IllegalArgumentException(
+          "Ligne avec " + values.size() + " valeurs au lieu de " + width + " : " + line);
+    }
+    return new Row(values.stream().map(CsvUtils::parseValue).toList());
+  }
+
+  private static List<String> split(String line) {
+    return Arrays.stream(line.split(",", -1)).map(String::trim).toList();
   }
 
   static Object parseValue(String s) {
