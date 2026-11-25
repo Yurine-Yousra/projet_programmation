@@ -1,6 +1,8 @@
 package fr.uvsq;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,5 +43,23 @@ class JoinTest {
     assertEquals(List.of(1, "Alice", 10, 1, 50), result.getRows().get(0).getValues());
     assertEquals(List.of(1, "Alice", 12, 1, 20), result.getRows().get(1).getValues());
     assertEquals(List.of(2, "Bob", 11, 2, 30), result.getRows().get(2).getValues());
+  }
+
+  @Test
+  void joinSansCorrespondanceDonneUneTableVide() {
+    Table autres = new Table(List.of("order_id", "user_id", "amount"));
+    autres.addRow(new Row(List.of(20, 99, 10)));
+
+    Table result = new Join(new Scan(users), new Scan(autres), "id", "user_id").execute();
+
+    assertTrue(result.getRows().isEmpty());
+    assertEquals(5, result.getColumns().size());
+  }
+
+  @Test
+  void joinSurColonneInconnueEstSignale() {
+    Operator plan = new Join(new Scan(users), new Scan(orders), "id", "absent");
+
+    assertThrows(IllegalArgumentException.class, plan::execute);
   }
 }

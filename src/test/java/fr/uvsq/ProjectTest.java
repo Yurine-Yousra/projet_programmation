@@ -1,6 +1,7 @@
 package fr.uvsq;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,5 +36,12 @@ class ProjectTest {
 
     assertEquals(List.of("age", "id"), result.getColumns());
     assertEquals(List.of(22, 1), result.getRows().get(0).getValues());
+  }
+
+  @Test
+  void projectSurColonneInconnueEstSignale() {
+    Operator plan = new Project(new Scan(users), List.of("taille"));
+
+    assertThrows(IllegalArgumentException.class, plan::execute);
   }
 }

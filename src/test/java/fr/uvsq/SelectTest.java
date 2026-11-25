@@ -1,6 +1,8 @@
 package fr.uvsq;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,5 +39,28 @@ class SelectTest {
     assertEquals(1, result.getRows().size());
     assertEquals(2, result.getRows().get(0).getInt(0));
     assertEquals("Bob", result.getRows().get(0).getString(1));
+  }
+
+  @Test
+  void selectAvecSuperieurGardeLesBonnesLignes() {
+    Table result = new Select(new Scan(users), PredicateParser.parse("age > 25")).execute();
+
+    assertEquals(List.of(List.of(2, "Bob", 30), List.of(3, "Charlie", 27)),
+        result.getRows().stream().map(Row::getValues).toList());
+  }
+
+  @Test
+  void selectSansResultatGardeLeSchema() {
+    Table result = new Select(new Scan(users), PredicateParser.parse("age > 99")).execute();
+
+    assertTrue(result.getRows().isEmpty());
+    assertEquals(users.getColumns(), result.getColumns());
+  }
+
+  @Test
+  void selectSurColonneInconnueEstSignale() {
+    Operator plan = new Select(new Scan(users), PredicateParser.parse("taille > 1"));
+
+    assertThrows(IllegalArgumentException.class, plan::execute);
   }
 }
