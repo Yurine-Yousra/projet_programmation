@@ -53,4 +53,15 @@ class PredicateParserTest {
   void colonneInconnueEstRefusee() {
     assertThrows(IllegalArgumentException.class, () -> test("taille > 3"));
   }
+
+  @Test
+  void texteResteDuTexte() {
+    Row row = new Row(List.of(5, "1d", 40));
+    assertFalse(PredicateParser.parse("name = 1").test(row, users));
+  }
+
+  @Test
+  void operateurInconnuEstRefuse() {
+    assertThrows(IllegalArgumentException.class, () -> PredicateParser.parse("age ~ 3"));
+  }
 }

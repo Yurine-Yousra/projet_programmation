@@ -39,35 +39,22 @@ public final class PredicateParser {
     if (!OPERATORS.contains(op)) {
       throw new IllegalArgumentException("Opérateur inconnu : " + op);
     }
-    String value = unquote(parts[2]);
-    Double number = toNumber(value);
+    Object value = parseConstant(parts[2]);
 
     return (row, table) -> {
       Object cell = row.get(table.getColumnIndex(col));
-      Double left = toNumber(cell);
-      if (left != null && number != null) {
-        return compareNumbers(op, left, number);
+      if (cell instanceof Number a && value instanceof Number b) {
+        return compareNumbers(op, a.doubleValue(), b.doubleValue());
       }
-      return compareStrings(op, cell.toString(), value);
+      return compareStrings(op, cell.toString(), value.toString());
     };
   }
 
-  private static String unquote(String s) {
+  private static Object parseConstant(String s) {
     if (s.length() >= 2 && s.startsWith("'") && s.endsWith("'")) {
       return s.substring(1, s.length() - 1);
     }
-    return s;
-  }
-
-  private static Double toNumber(Object o) {
-    if (o instanceof Number n) {
-      return n.doubleValue();
-    }
-    try {
-      return Double.parseDouble(o.toString());
-    } catch (NumberFormatException e) {
-      return null;
-    }
+    return CsvUtils.parseValue(s);
   }
 
   private static boolean compareNumbers(String op, double left, double right) {
