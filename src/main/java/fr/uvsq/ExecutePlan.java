@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +30,9 @@ public final class ExecutePlan {
     }
     try {
       System.out.println("Résultat écrit dans " + run(args[0]));
+    } catch (NoSuchFileException e) {
+      System.err.println("Erreur : fichier introuvable " + e.getMessage());
+      System.exit(1);
     } catch (IOException | RuntimeException e) {
       System.err.println("Erreur : " + e.getMessage());
       System.exit(1);
@@ -53,19 +57,20 @@ public final class ExecutePlan {
   }
 
   static Table evaluate(JsonObject config) {
-    JsonObject tablesJson = config.getAsJsonObject("tables");
+    JsonObject tablesJson = PlanBuilder.required(config, "tables").getAsJsonObject();
     Map<String, Table> tables = tablesJson.keySet().stream()
         .collect(Collectors.toMap(name -> name,
             name -> load(tablesJson.get(name).getAsString())));
 
-    return new PlanBuilder(tables).build(config.getAsJsonObject("plan")).execute();
+    JsonObject plan = PlanBuilder.required(config, "plan").getAsJsonObject();
+    return new PlanBuilder(tables).build(plan).execute();
   }
 
   private static Table load(String csvPath) {
     try {
       return CsvUtils.readCsv(csvPath);
     } catch (IOException e) {
-      throw new UncheckedIOException(e);
+      throw new UncheckedIOException("Lecture impossible de " + csvPath, e);
     }
   }
 }

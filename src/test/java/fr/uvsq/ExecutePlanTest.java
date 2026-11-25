@@ -2,10 +2,12 @@ package fr.uvsq;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
@@ -56,4 +58,26 @@ class ExecutePlanTest {
         Files.readAllLines(out));
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"tables", "plan"})
+  void champManquantEstSignale(String field) throws IOException {
+    JsonObject config = read("plan1");
+    config.remove(field);
+
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+        () -> ExecutePlan.evaluate(config));
+
+    assertTrue(e.getMessage().contains(field));
+  }
+
+  @Test
+  void tableIntrouvableEstSignalee() throws IOException {
+    JsonObject config = read("plan1");
+    config.getAsJsonObject("tables").addProperty("users", "absent.csv");
+
+    UncheckedIOException e = assertThrows(UncheckedIOException.class,
+        () -> ExecutePlan.evaluate(config));
+
+    assertTrue(e.getMessage().contains("absent.csv"));
+  }
 }

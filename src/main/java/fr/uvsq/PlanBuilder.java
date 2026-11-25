@@ -80,7 +80,7 @@ public class PlanBuilder {
     return new Aggregate(b.input(node, "input"), groupBy, function, column, alias);
   }
 
-  private static JsonElement required(JsonObject node, String field) {
+  static JsonElement required(JsonObject node, String field) {
     JsonElement e = node.get(field);
     if (e == null) {
       throw new IllegalArgumentException("Champ \"" + field + "\" manquant dans " + node);
@@ -92,7 +92,7 @@ public class PlanBuilder {
     return required(node, field).getAsString();
   }
 
-  static List<String> strings(JsonObject node, String field) {
+  private static List<String> strings(JsonObject node, String field) {
     return required(node, field).getAsJsonArray().asList().stream()
         .map(JsonElement::getAsString)
         .toList();
