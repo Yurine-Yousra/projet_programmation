@@ -32,3 +32,6 @@ tmp/
 
 # Sortie produite en lançant le jar depuis la racine
 results/output.csv
+
+# JSON générés par la traduction des fichiers .alg
+alg/*.json

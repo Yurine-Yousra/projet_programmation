@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/** Point d'entrée : exécute la requête JSON passée en argument. */
+/** Point d'entrée : exécute une requête JSON ou traduit une requête .alg. */
 public final class ExecutePlan {
 
   private ExecutePlan() {
@@ -19,11 +19,15 @@ public final class ExecutePlan {
   /** Lance l'exécution. */
   public static void main(String[] args) {
     if (args.length != 1) {
-      System.out.println("Usage: java -jar td4_alg.jar requete.json");
+      System.out.println("Usage: java -jar td4_alg.jar requete.json | requete.alg");
       return;
     }
     try {
-      System.out.println("Résultat écrit dans " + run(args[0]));
+      if (args[0].endsWith(AlgTranslator.EXTENSION)) {
+        System.out.println("Traduction en " + AlgTranslator.translateFile(args[0]));
+      } else {
+        System.out.println("Résultat écrit dans " + run(args[0]));
+      }
     } catch (NoSuchFileException e) {
       System.err.println("Erreur : fichier introuvable " + e.getMessage());
       System.exit(1);
